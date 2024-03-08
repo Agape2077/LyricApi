@@ -1,3 +1,19 @@
+# LyricAPI
+从网易云音乐获取歌词 并以lrc文件内容（后续会换成API的方式）呈现
+
+## 使用方法
+需要Python3 以上的环境。
+克隆并安装依赖：
+```shell
+git clone github.com/agape2077/LyricApi.git
+pip install -r requirements.txt
+```
+运行：
+```shell
+python app.py
+```
+
+
 
 ## 请求
 ### 请求方式：Get
