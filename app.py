@@ -1,4 +1,4 @@
-from flask import Flask,request
+from flask import Flask,request,Response
 import netease
 
 
@@ -26,8 +26,17 @@ Hello!
 
 @app.route("/album")
 def cover():
-    return ""
+    return "锐意制作中~"
 
+@app.route("/lyrics")
+def lyric_new():
+    resp_json = {[{"id": "1",
+                   "title":"锐意制作中",
+                   "artist":"锐意制作中",
+                   "lyrics":"[00:00:00]锐意制作中"
+
+    }]}
+    return Response(resp_json,content_type='application/json')
 
 if __name__ == '__main__':
     from waitress import serve
