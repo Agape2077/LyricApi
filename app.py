@@ -6,13 +6,16 @@ app = Flask(__name__)
 
 @app.route("/lyric", methods=['GET'])
 def get_data():    
-    artist =str(request.args.get('artist'))
-    title = str(request.args.get('title'))
-    if artist is None:
-        artist = " "
-    if title is None:
-        title = " "
-    return netease.getLyric(netease.search(title,artist))
+    try:
+        artist =str(request.args.get('artist'))
+        title = str(request.args.get('title'))
+        if artist is None:
+            artist = " "
+        if title is None:
+            title = " "
+        return netease.getLyric(netease.search(title,artist))
+    except:
+        return "好像有点问题，考虑下换个词试试？"
 @app.route("/")
 def index():
     return """
@@ -30,14 +33,14 @@ def cover():
 
 @app.route("/lyrics")
 def lyric_new():
-    resp_json = {[{"id": "1",
+    resp_json = """{[{"id": "1",
                    "title":"锐意制作中",
                    "artist":"锐意制作中",
                    "lyrics":"[00:00:00]锐意制作中"
 
-    }]}
+    }]}"""
     return Response(resp_json,content_type='application/json')
 
 if __name__ == '__main__':
     from waitress import serve
-    serve(app,port=10492)
+    serve(app,port=10492,host="127.0.0.1")
