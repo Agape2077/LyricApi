@@ -5,7 +5,7 @@
 需要Python3 以上的环境。
 克隆并安装依赖：
 ```shell
-git clone github.com/agape2077/LyricApi.git
+git clone https://github.com/Agape2077/LyricApi.git
 pip install -r requirements.txt
 ```
 运行：
