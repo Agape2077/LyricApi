@@ -2,6 +2,7 @@ import requests
 import json
 import urllib.parse as urlparse
 import html
+import base64
 
 
 def search(song, artist):
@@ -9,7 +10,6 @@ def search(song, artist):
     根据歌曲和艺术家在QQ音乐搜索，返回一个包含歌曲信息的列表。
     """
     keywords = urlparse.quote(f"{song} {artist}")
-    # 使用您提供的API URL结构，将n（数量）设置为3
     search_url = f"https://c.y.qq.com/soso/fcgi-bin/search_cp?t=0&aggr=1&cr=1&catZhida=1&lossless=0&flag_qc=0&p=1&w={keywords}&n=3&format=json&inCharset=utf8&outCharset=utf-8&notice=0&platform=yqq&needNewCode=0"
 
     try:
@@ -41,9 +41,9 @@ def search(song, artist):
 def getLyric(songid, songmid):
     """
     根据QQ音乐的songid和songmid获取歌词。
+    因网页端refer不推送中文歌词翻译，在此不做解析。
     """
-    # 使用您提供的歌词API URL结构
-    lyric_url = f"https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg?nobase64=1&musicid={songid}&format=json&inCharset=utf8&outCharset=utf-8"
+    lyric_url = f"https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric.fcg?nobase64=1&musicid={songid}&format=jsonp&inCharset=utf8&outCharset=utf-8"
 
     # QQ音乐歌词接口需要Referer头
     headers = {
@@ -63,7 +63,7 @@ def getLyric(songid, songmid):
             start = jsonp_text.find('(')
             end = jsonp_text.rfind(')')
             if start != -1 and end != -1:
-                json_text = jsonp_text[start + 1:end]
+                json_text = jsonp_text[start+1:end]
             else:
                 json_text = jsonp_text
 
@@ -81,3 +81,44 @@ def getLyric(songid, songmid):
         print(f"解析QQ音乐歌词结果失败: {e}")
 
     return "获取歌词时发生错误。"
+#
+# def getLyric(songid,songmid):
+#     """
+#     暂不启用
+#     【新】根据QQ音乐的songmid获取歌词。
+#     """
+#     url = "https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg"
+#     payload = {
+#         "songmid": songmid,
+#         "loginUin": "0",
+#         "hostUin": "0",
+#         "format": "json",
+#         "inCharset": "utf8",
+#         "outCharset": "utf-8",
+#         "notice": "0",
+#         "platform": "yqq.json",
+#         "needNewCode": "0"
+#     }
+#     headers = {
+#         "referer": "https://y.qq.com/portal/player.html"
+#     }
+#
+#     try:
+#         r = requests.get(url, params=payload, headers=headers, timeout=10)
+#         r.raise_for_status()
+#         json_data = r.json()
+#
+#         if json_data.get('code') == 0 and 'lyric' in json_data:
+#             lyric_base64 = json_data["lyric"]
+#             # Base64解码并使用UTF-8解码为字符串
+#             lyric = base64.b64decode(lyric_base64).decode("utf-8")
+#             return lyric
+#         else:
+#             return "未找到该歌曲的歌词。"
+#
+#     except requests.RequestException as e:
+#         print(f"QQ音乐新接口歌词请求失败: {e}")
+#     except (json.JSONDecodeError, KeyError, base64.B64DecodeError) as e:
+#         print(f"解析QQ音乐新接口歌词结果失败: {e}")
+#
+#     return "获取歌词时发生错误。"
