@@ -50,6 +50,9 @@ def fetch_netease_data(song_id):
         if not song_title:
             return None
         lyrics = netease.getLyric(song_id)
+        # 检查是否真的获取到了歌词
+        if "没有找到歌词" in lyrics:
+            return None
         # 检查是否有翻译
         has_translation = "【" in lyrics
         # 在歌词前添加LRC格式的来源信息
@@ -79,6 +82,9 @@ def fetch_qqmusic_data(song_info):
             return None
 
         lyrics = qqmusic.getLyric(song_info['songid'], song_info['songmid'])
+        # 检查是否真的获取到了歌词
+        if "未找到该歌曲的歌词" in lyrics:
+            return None
         # 在歌词前添加LRC格式的来源信息
         lyrics_with_source = f"[00:00.00]来源：QQ音乐\n{lyrics}"
         return {
@@ -108,6 +114,9 @@ def fetch_kugou_data(song_info):
             return None
 
         lyrics = kugou.getLyric(song_info['hash'])
+        # 检查是否真的获取到了歌词
+        if "没有找到" in lyrics or "无法下载" in lyrics or "发生错误" in lyrics:
+            return None
         # 在歌词前添加LRC格式的来源信息
         lyrics_with_source = f"[00:00.00]来源：酷狗音乐\n{lyrics}"
         return {
