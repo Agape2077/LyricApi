@@ -35,18 +35,24 @@ python app.py
         "id": "string",
         "title": "title",
         "artist": "artist",
-        "lyrics": "lrc content"
-    },
+        "lyrics": "lrc content",
+        "source": "netease/qqmusic/kugou"
+    }
 
-...
+
 ]
+
 ```
+为了防止被风控，每个服务只会获取三个结果
+
+
 | 配置项  |类型| 键        |说明|
 |------| ---- |----------| --- |
 | id   |	string	| string   | 可为字符串，用于与其他歌词去重 
  歌曲标题 |string| title    |可与查询的结果不一致
  歌手名  |	string| 	artist	 |可与查询的结果不一致
  歌词   |string| lyrics   |歌词文件内容
+来源|string|source|歌词来源
 
 
 
