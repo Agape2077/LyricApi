@@ -6,7 +6,41 @@ import kugou
 
 app = Flask(__name__)
 
+def _search_and_sort_lyrics(title, artist):
+    """
+    核心邏輯：在三個平台上搜索並發獲取數據，然後排序。
+    """
+    # 在三個平台上搜索
+    netease_song_ids = netease.search(title, artist)
+    qq_songs_info = qqmusic.search(title, artist)
+    kugou_songs_info = kugou.search(title, artist)
 
+    all_results = []
+    # 使用ThreadPoolExecutor並發獲取所有歌曲數據
+    with ThreadPoolExecutor(max_workers=9) as executor:
+        netease_futures = executor.map(fetch_netease_data, netease_song_ids[:3])
+        qqmusic_futures = executor.map(fetch_qqmusic_data, qq_songs_info[:3])
+        kugou_futures = executor.map(fetch_kugou_data, kugou_songs_info[:3])
+
+        all_results.extend([res for res in netease_futures if res is not None])
+        all_results.extend([res for res in qqmusic_futures if res is not None])
+        all_results.extend([res for res in kugou_futures if res is not None])
+
+    # 為每個結果計算相關性得分
+    for result in all_results:
+        result['score'] = calculate_relevance_score(result, title, artist)
+
+    # 按分數降序排序，分數相同時有翻譯的優先
+    all_results.sort(key=lambda x: (x.get('score', 0), x.get('has_translation', False)), reverse=True)
+
+    # 在返回前移除臨時鍵
+    for result in all_results:
+        if 'score' in result:
+            del result['score']
+        if 'has_translation' in result:
+            del result['has_translation']
+            
+    return all_results
 def calculate_relevance_score(result, query_title, query_artist):
     """
     计算单个结果与查询词的相关性分数。
@@ -185,6 +219,28 @@ def get_data():
         return jsonify({"error": "服务器内部错误，请稍后再试。"}), 500
 
 
+@app.route("/one", methods=['GET'])
+def get_best_data():
+
+    try:
+        artist = str(request.args.get('artist', ''))
+        title = str(request.args.get('title', ''))
+
+        if not title:
+            return jsonify({"error": "必须提供 'title' 参数。"}), 400
+
+        all_results = _search_and_sort_lyrics(title, artist)
+        
+        if all_results:
+            return jsonify(all_results[0])
+        else:
+            return jsonify({"error": "未找到匹配的歌詞"}), 404
+
+    except Exception as e:
+        print(f"發生嚴重錯誤: {e}")
+        return jsonify({"error": "服务器内部错误，请稍后再试。"}), 500
+
+
 @app.route("/")
 def index():
     """
@@ -193,20 +249,10 @@ def index():
     return """
     <html>
     <head>
-        <title>聚合歌词搜索 API</title>
-        <style>
-            body { font-family: sans-serif; line-height: 1.6; padding: 2em; }
-            h1 { color: #333; }
-            p { color: #555; }
-            code { background-color: #f4f4f4; padding: 2px 4px; border-radius: 4px; }
-        </style>
+       ???
     </head>
     <body>
-        <h1>聚合歌词搜索 API</h1>
-        <p>这是一个聚合歌词服务器。请使用 <code>/lyric</code> 接口来获取歌词。</p>
-        <p>使用示例: <code>/lyric?title=歌曲名&artist=艺术家名</code></p>
-        <p>返回结果会包含一个 <code>source</code> 字段来区分来源 (<code>Netease</code>, <code>QQMusic</code>, 或 <code>Kugou</code>)。</p>
-    </body>
+...........</body>
     </html>
     """
 
